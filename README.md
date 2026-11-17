@@ -149,48 +149,6 @@ flowchart TB
 
 
 
-
-
-```text
-                   Client / Terminal
-                          |
-                    jobCommander
-                          |
-                     TCP Socket
-                          |
-              +-----------------------+
-              |   jobExecutorServer   |
-              |                       |
-              |      Main Thread      |
-              |  Accepts connections  |
-              +-----------+-----------+
-                          |
-                  Controller Threads
-                          |
-               +----------v----------+
-               |  Shared Job Queue   |
-               |   Bounded FIFO       |
-               +----------+----------+
-                          |
-                Mutex / Condition
-                   Variables
-                          |
-             +------------+------------+
-             |            |            |
-          Worker 1     Worker 2      Worker N
-             |            |            |
-          Child        Child         Child
-          Process      Process       Process
-             |            |            |
-             +------------+------------+
-                          |
-                  Captured Job Output
-                          |
-                     TCP Socket
-                          |
-                     jobCommander
-```
-
 ### Main components
 
 | Component | Responsibility |
@@ -536,10 +494,3 @@ Possible areas for further development include:
 
 These are potential extensions and hardening tasks, rather than claims that all of them are already implemented.
 
-## Academic Context
-
-This project was developed as part of a university systems-programming / operating-systems assignment.
-
-**Final grade: 97/100**
-
-The implementation provided practical experience with multithreaded programming, synchronization, client-server networking, bounded-buffer coordination, Unix process management, and low-level systems programming.
