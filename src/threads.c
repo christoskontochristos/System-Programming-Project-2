@@ -215,9 +215,10 @@ int Spawn_Controller_Thread(char *commander_input, int socket_fd, Server_Info *i
     }
 
     //wait for the controller thread
-    if(Join_Thread(tid) == -1){
-        return -1;
-    }
+    // if(Join_Thread(tid) == -1){
+    //     return -1;
+    // }
+    pthread_detach(tid);
 
     // printf("CONTROLLER THREAD ENDED\n");
 
