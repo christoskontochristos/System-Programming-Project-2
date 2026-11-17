@@ -43,6 +43,114 @@ The client can also inspect queued jobs, cancel jobs that have not yet started, 
 
 ## Architecture
 
+
+```mermaid
+flowchart TB
+    %% Clients
+    subgraph CLIENTS["Multiple Clients"]
+        C1["jobCommander<br/>Client 1"]
+        C2["jobCommander<br/>Client 2"]
+        CN["jobCommander<br/>Client N"]
+    end
+
+    %% Communication
+    TCP["TCP Socket Communication"]
+
+    %% Server
+    subgraph SERVER["jobExecutorServer"]
+        direction TB
+
+        MAIN["Main Thread<br/>Accepts Client Connections"]
+
+        subgraph HANDLERS["Client Request Handling"]
+            direction LR
+            H1["Controller Thread 1"]
+            H2["Controller Thread 2"]
+            HN["Controller Thread N"]
+        end
+
+        subgraph MANAGEMENT["Job Management"]
+            direction TB
+            QUEUE[("Shared Bounded FIFO<br/>Job Queue")]
+            SYNC["Mutex & Condition Variables"]
+            COMMANDS["Job Management Operations<br/>• List queued jobs<br/>• Cancel pending jobs<br/>• Change execution concurrency<br/>• Shutdown server"]
+        end
+
+        subgraph EXECUTION["Worker Pool"]
+            direction LR
+            W1["Worker 1"]
+            W2["Worker 2"]
+            WN["Worker N"]
+        end
+
+        subgraph PROCESSES["Child Processes"]
+            direction LR
+            P1["Process 1"]
+            P2["Process 2"]
+            PN["Process N"]
+        end
+
+        OUTPUT["Captured Job Output"]
+
+        MAIN --> H1
+        MAIN --> H2
+        MAIN --> HN
+
+        H1 --> QUEUE
+        H2 --> QUEUE
+        HN --> QUEUE
+
+        QUEUE --- SYNC
+        COMMANDS <--> QUEUE
+
+        QUEUE --> W1
+        QUEUE --> W2
+        QUEUE --> WN
+
+        W1 --> P1
+        W2 --> P2
+        WN --> PN
+
+        P1 --> OUTPUT
+        P2 --> OUTPUT
+        PN --> OUTPUT
+    end
+
+    %% Client connections
+    C1 <--> TCP
+    C2 <--> TCP
+    CN <--> TCP
+
+    TCP <--> MAIN
+
+    %% Responses
+    OUTPUT --> TCP
+
+    %% Styling
+    classDef client fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef communication fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef thread fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+    classDef queue fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef worker fill:#ccfbf1,stroke:#0d9488,color:#134e4a,stroke-width:2px
+    classDef process fill:#f0fdf4,stroke:#22c55e,color:#14532d,stroke-width:2px
+    classDef output fill:#f3e8ff,stroke:#9333ea,color:#581c87,stroke-width:2px
+
+    class C1,C2,CN client
+    class TCP communication
+    class MAIN,H1,H2,HN thread
+    class QUEUE,SYNC,COMMANDS queue
+    class W1,W2,WN worker
+    class P1,P2,PN process
+    class OUTPUT output
+```
+
+
+
+
+
+
+
+
 ```text
                    Client / Terminal
                           |
